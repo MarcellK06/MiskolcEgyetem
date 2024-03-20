@@ -65,11 +65,16 @@ const poolMaterial = new THREE.MeshBasicMaterial({color: 0xfffffff, side:THREE.D
 // POOL OUTLINE/BORDER
 const poolObject = new THREE.Mesh(poolGeometry, poolMaterial);
 const poolOutline = new THREE.LineSegments(new THREE.EdgesGeometry(poolGeometry), new THREE.LineBasicMaterial({color: 0xffffff}));
+scene.add(poolObject);
 
 // POOL DATA
 var poolBoundingBoxData = [poolGeometry.center().boundingBox.min, poolGeometry.center().boundingBox.max];
+
+// POOL HALVER
 const poolBordersLineGeometry = new THREE.BufferGeometry().setFromPoints(poolBoundingBoxData);
 const poolBordersLine = new THREE.Line(poolBordersLineGeometry, THREE.poolMaterial);
+scene.add(poolOutline);
+scene.add(poolBordersLine);
 
 // GYONGY SETUP
 const gyongyMaterial = new THREE.MeshBasicMaterial({color: 0xffde59});
@@ -83,6 +88,17 @@ for(var k = 0; k < allGyongyData.length; k++) {
     gyongyObject.position.setZ(poolBoundingBoxData[0].z + allGyongyData[k].v3.z);
 }
 
+// ADD ORIGIN
+
+const origin = poolBoundingBoxData[0];
+const originGeometry = new THREE.SphereGeometry(2);
+const originMaterial = new THREE.MeshBasicMaterial({color: 0xe4080a});
+const originObject = new THREE.Mesh(originGeometry, originMaterial);
+originObject.position.x = origin.x;
+originObject.position.y = origin.y;
+originObject.position.z = origin.z;
+poolObject.add(originObject);
+
 // APPLY SETTINGS
 poolObject.rotation.setFromVector3(poolRotation);
 poolOutline.rotation.setFromVector3(poolRotation);
@@ -94,10 +110,6 @@ camera.position.y = -70;
 camera.position.z = 80;
 camera.rotation.x += .4;
 
-// ADD OBJECTS
-scene.add(poolObject);
-scene.add(poolOutline);
-scene.add(poolBordersLine);
 function animate() {
 	requestAnimationFrame( animate );
 
