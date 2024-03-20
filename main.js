@@ -24,6 +24,10 @@ var allGyongyData = [];
 // VECTOR3 VARIABLE TO DETERMINE FUTURE MAX SIZE OF POOL
 var maxPositions = new THREE.Vector3(0, 0, 0);
 
+var t = 0;
+var v = 0;
+var totalE = 0;
+
 // LOOP THROUGH LINES
 for(var k = 1; k < gyongyfilelines.length; k++) {
     // CLEAN END OF LINE
@@ -45,7 +49,8 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
     allGyongyData.push(new gyongyData(new THREE.Vector3(x, y, z), e))
 }
 
-
+// SORT BY ÉRTÉK; EASIER PATH PLANNING
+allGyongyData.sort((a, b) => b.e - a.e);
 
 // SET UP SCENE, CAMERA AND RENDERER
 const scene = new THREE.Scene();
@@ -66,15 +71,15 @@ const poolMaterial = new THREE.MeshBasicMaterial({color: 0xfffffff, side:THREE.D
 const poolObject = new THREE.Mesh(poolGeometry, poolMaterial);
 const poolOutline = new THREE.LineSegments(new THREE.EdgesGeometry(poolGeometry), new THREE.LineBasicMaterial({color: 0xffffff}));
 scene.add(poolObject);
+scene.add(poolOutline);
 
 // POOL DATA
 var poolBoundingBoxData = [poolGeometry.center().boundingBox.min, poolGeometry.center().boundingBox.max];
 
-// POOL HALVER
+/* DEBUG - POOL HALFER
 const poolBordersLineGeometry = new THREE.BufferGeometry().setFromPoints(poolBoundingBoxData);
 const poolBordersLine = new THREE.Line(poolBordersLineGeometry, THREE.poolMaterial);
-scene.add(poolOutline);
-scene.add(poolBordersLine);
+*/
 
 // GYONGY SETUP
 const gyongyMaterial = new THREE.MeshBasicMaterial({color: 0xffde59});
@@ -102,16 +107,21 @@ poolObject.add(originObject);
 // APPLY SETTINGS
 poolObject.rotation.setFromVector3(poolRotation);
 poolOutline.rotation.setFromVector3(poolRotation);
+
+/* DEBUG - POOL HALFER
 poolBordersLine.position.y = poolPosition.y;
 poolBordersLine.rotation.setFromVector3(poolRotation);
+*/
 
 // CAMERA SETTINGS
 
+// CALCULATE DIRECTION
 const direction = new THREE.Vector3(poolObject.position.x - camera.position.x, poolObject.position.y - camera.position.y, poolObject.position.z - camera.position.z);
 direction.normalize();
 const distance = camera.position.distanceTo(poolBoundingBoxData[0]);
 camera.translateOnAxis(direction, distance);
 var distanceToMiddle = 0;
+// GET FURTHEST POINT
 for(var k = 0; k < poolBoundingBoxData.length; k++) {
     if (poolBoundingBoxData[k].x > distanceToMiddle)
         distanceToMiddle = poolBoundingBoxData[k].x;
@@ -120,8 +130,10 @@ for(var k = 0; k < poolBoundingBoxData.length; k++) {
     if (poolBoundingBoxData[k].z > distanceToMiddle)
         distanceToMiddle = poolBoundingBoxData[k].z;
 }
+
 distanceToMiddle *= 2;
 camera.position.z += distanceToMiddle;
+// LOOK AT MIDDLE OF POOL
 camera.lookAt(poolObject.position);
 
 // MOVE CAMERA
