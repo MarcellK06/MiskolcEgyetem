@@ -1,31 +1,94 @@
 import * as THREE from 'three';
+
+import fs from 'vite-plugin-fs/browser'
+const gyongyPath = "./gyongyok.txt"
+
+/**
+ * @param {THREE.Vector3Like} v3 A gyöngy Vector3 adata
+ * @param {number} e A gyöngy értéke 
+ */
+class gyongyData {
+    constructor(v3, e) {
+        this.v3 = v3;
+        this.e = e;
+    }
+}
+
+const gyongyfile = await fs.readFile('./gyongyok.txt');
+const gyongyfilelines = gyongyfile.split('\n');
+var allGyongyData = [];
+var maxPositions = new THREE.Vector3(0, 0, 0);
+for(var k = 1; k < gyongyfilelines.length; k++) {
+    gyongyfilelines[k] = gyongyfilelines[k].substring(0, gyongyfilelines[k].lastIndexOf(';'));
+    var parts = gyongyfilelines[k].split(';');
+    var x = parseInt(parts[0]),
+        y=parseInt(parts[1]),
+        z = parseInt(parts[2]),
+        e = parseInt(parts[3]);
+
+    if (x > maxPositions.x)
+        maxPositions.x = x;
+    if (y > maxPositions.y)
+        maxPositions.y = y;
+    if (z > maxPositions.z)
+        maxPositions.z = z;
+
+    allGyongyData.push(new gyongyData(new THREE.Vector3(x, y, z), e))
+}
+
+
+
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-camera.position.z = 35;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 // POOL SETTINGS
-const poolRotation = new THREE.Vector3(15, -0.2, 0);
-const poolPosition = new THREE.Vector3(0, -3, 0);
+const poolRotation = new THREE.Vector3(15, 0, 0);
+const poolPosition = new THREE.Vector3(0, 0, 0);
 
 // POOL OBJECT
-const poolGeometry = new THREE.BoxGeometry(20, 10, 5);
+const poolGeometry = new THREE.BoxGeometry(maxPositions.x, maxPositions.y, maxPositions.z);
 const poolMaterial = new THREE.MeshBasicMaterial({color: 0xfffffff, side:THREE.DoubleSide , transparent:true, opacity: 0.1});
 
 // POOL OUTLINE/BORDER
 const poolObject = new THREE.Mesh(poolGeometry, poolMaterial);
 const poolOutline = new THREE.LineSegments(new THREE.EdgesGeometry(poolGeometry), new THREE.LineBasicMaterial({color: 0xffffff}));
 
+// POOL DATA
+var poolBoundingBoxData = [poolGeometry.center().boundingBox.min, poolGeometry.center().boundingBox.max];
+const poolBordersLineGeometry = new THREE.BufferGeometry().setFromPoints(poolBoundingBoxData);
+const poolBordersLine = new THREE.Line(poolBordersLineGeometry, THREE.poolMaterial);
+
+// GYONGY SETUP
+const gyongyMaterial = new THREE.MeshBasicMaterial({color: 0xffde59});
+
+for(var k = 0; k < allGyongyData.length; k++) {
+    const gyongyGeometry = new THREE.SphereGeometry(allGyongyData[k].e/10);
+    const gyongyObject = new THREE.Mesh(gyongyGeometry, gyongyMaterial);
+    poolObject.add(gyongyObject);
+    gyongyObject.position.setX(poolBoundingBoxData[0].x + allGyongyData[k].v3.x);
+    gyongyObject.position.setY(poolBoundingBoxData[0].y + allGyongyData[k].v3.y);
+    gyongyObject.position.setZ(poolBoundingBoxData[0].z + allGyongyData[k].v3.z);
+}
+
 // APPLY SETTINGS
 poolObject.rotation.setFromVector3(poolRotation);
-poolObject.position.y = poolPosition.y;
 poolOutline.rotation.setFromVector3(poolRotation);
-poolOutline.position.y = poolPosition.y;
+poolBordersLine.position.y = poolPosition.y;
+poolBordersLine.rotation.setFromVector3(poolRotation);
 
+camera.position.x = 0;
+camera.position.y = -70;
+camera.position.z = 80;
+camera.rotation.x += .4;
+
+// ADD OBJECTS
 scene.add(poolObject);
 scene.add(poolOutline);
+scene.add(poolBordersLine);
 function animate() {
 	requestAnimationFrame( animate );
 
