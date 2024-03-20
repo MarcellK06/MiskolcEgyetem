@@ -105,14 +105,56 @@ poolOutline.rotation.setFromVector3(poolRotation);
 poolBordersLine.position.y = poolPosition.y;
 poolBordersLine.rotation.setFromVector3(poolRotation);
 
-camera.position.x = 0;
-camera.position.y = -70;
-camera.position.z = 80;
-camera.rotation.x += .4;
+// CAMERA SETTINGS
+
+const direction = new THREE.Vector3(poolObject.position.x - camera.position.x, poolObject.position.y - camera.position.y, poolObject.position.z - camera.position.z);
+direction.normalize();
+const distance = camera.position.distanceTo(poolBoundingBoxData[0]);
+camera.translateOnAxis(direction, distance);
+var distanceToMiddle = 0;
+for(var k = 0; k < poolBoundingBoxData.length; k++) {
+    if (poolBoundingBoxData[k].x > distanceToMiddle)
+        distanceToMiddle = poolBoundingBoxData[k].x;
+    if (poolBoundingBoxData[k].y > distanceToMiddle)
+        distanceToMiddle = poolBoundingBoxData[k].y;
+    if (poolBoundingBoxData[k].z > distanceToMiddle)
+        distanceToMiddle = poolBoundingBoxData[k].z;
+}
+distanceToMiddle *= 2;
+camera.position.z += distanceToMiddle;
+camera.lookAt(poolObject.position);
+
+// MOVE CAMERA
+var keyStates = {};    
+window.addEventListener('keydown',function(e){
+    keyStates[e.keyCode] = true;
+},true);    
+window.addEventListener('keyup',function(e){
+    keyStates[e.keyCode] = false;
+},true);
+
+function moveLoop() {
+    var xDirection = 0;
+    var yDirection = 0;
+    if (keyStates[83]) yDirection -= 1;
+    if (keyStates[87]) yDirection += 1;
+    if (keyStates[65]) xDirection -= 1;
+    if (keyStates[68]) xDirection += 1;
+
+    const lookDirection = new THREE.Vector3();
+    camera.getWorldDirection(lookDirection);
+    camera.translateY(yDirection);
+    camera.translateX(xDirection);
+    setTimeout(moveLoop, 16.66);
+}    
+
 
 function animate() {
 	requestAnimationFrame( animate );
-
+    camera.lookAt(poolObject.position);
+    renderer.setSize( window.innerWidth, window.innerHeight ); // CONSTANTLY SET RENDERER SIZE INCASE OF NEW RESOLUTION
 	renderer.render( scene, camera );
 }
+
+moveLoop();
 animate();
