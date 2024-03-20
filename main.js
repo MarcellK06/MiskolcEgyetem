@@ -26,7 +26,10 @@ var maxPositions = new THREE.Vector3(0, 0, 0);
 
 // LOOP THROUGH LINES
 for(var k = 1; k < gyongyfilelines.length; k++) {
+    // CLEAN END OF LINE
     gyongyfilelines[k] = gyongyfilelines[k].substring(0, gyongyfilelines[k].lastIndexOf(';'));
+
+    // BREAK LINE INTO PARTS AND STORE THEM TO CORRESPONDING VARIABLES
     var parts = gyongyfilelines[k].split(';');
     var x = parseInt(parts[0]),
         y=parseInt(parts[1]),
@@ -34,9 +37,9 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
         e = parseInt(parts[3]);
 
     // CHECK IF BIGGER SIZE IF NEEDED
-    if (x > maxPositions.x)    maxPositions.x = x;
-    if (y > maxPositions.y)    maxPositions.y = y;
-    if (z > maxPositions.z)    maxPositions.z = z;
+    if (x > maxPositions.x) maxPositions.x = x;
+    if (y > maxPositions.y) maxPositions.y = y;
+    if (z > maxPositions.z) maxPositions.z = z;
 
     // ADD GYONGY TO THE LIST
     allGyongyData.push(new gyongyData(new THREE.Vector3(x, y, z), e))
