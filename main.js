@@ -168,7 +168,11 @@ function storeValues() {
 
 function startRobot() {
     storeValues();
+    console.log(`${t} | ${v}`);
 }
+
+// EXPOSE startRobot() AS THIS JS FILE IS ORIGINALLY IMPORTED AS A MODULE
+window.startRobot = startRobot;
 
 // STATS FOR PERFORMANCE
 //stats.showPanel(0) 
