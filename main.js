@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-
+//import Stats from 'stats.js'
 import fs from 'vite-plugin-fs/browser'
-const gyongyPath = "./gyongyok.txt"
 
 /**
  * @param {THREE.Vector3Like} v3 A gyöngy Vector3 adata
@@ -17,6 +16,9 @@ class gyongyData {
 // READ AND SEPERATE LINES FOR FILE
 const gyongyfile = await fs.readFile('./gyongyok.txt');
 const gyongyfilelines = gyongyfile.split('\n');
+
+// STATS FOR PERFORMANCE
+//const stats = new Stats()
 
 // LIST TO STORE GYONGY DATA INTO
 var allGyongyData = [];
@@ -60,7 +62,7 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 // POOL SETTINGS
-const poolRotation = new THREE.Vector3(15, 0, 0);
+const poolRotation = new THREE.Vector3(1.57, 0, 0);
 const poolPosition = new THREE.Vector3(0, 0, 0);
 
 // POOL OBJECT
@@ -105,8 +107,6 @@ originObject.position.z = origin.z;
 poolObject.add(originObject);
 
 // APPLY SETTINGS
-poolObject.rotation.setFromVector3(poolRotation);
-poolOutline.rotation.setFromVector3(poolRotation);
 
 /* DEBUG - POOL HALFER
 poolBordersLine.position.y = poolPosition.y;
@@ -133,8 +133,6 @@ for(var k = 0; k < poolBoundingBoxData.length; k++) {
 
 distanceToMiddle *= 2;
 camera.position.z += distanceToMiddle;
-// LOOK AT MIDDLE OF POOL
-camera.lookAt(poolObject.position);
 
 // MOVE CAMERA
 var keyStates = {};    
@@ -154,18 +152,40 @@ function moveLoop() {
     if (keyStates[68]) xDirection += 1;
 
     const lookDirection = new THREE.Vector3();
-    camera.getWorldDirection(lookDirection);
-    camera.translateY(yDirection);
-    camera.translateX(xDirection);
+    poolObject.getWorldDirection(lookDirection);
+    poolRotation.y -= xDirection * 0.01;
+    poolRotation.x -= yDirection * 0.01;
+    poolObject.rotation.setFromVector3(poolRotation);
+    poolOutline.rotation.setFromVector3(poolRotation);
     setTimeout(moveLoop, 16.66);
 }    
 
 
+function storeValues() {
+    t = document.getElementById('time').value;
+    v = document.getElementById('speed').value;
+}
+
+function startRobot() {
+    storeValues();
+}
+
+// STATS FOR PERFORMANCE
+//stats.showPanel(0) 
+
+//document.body.appendChild(stats.dom)
+
 function animate() {
+    //stats.begin();
+
 	requestAnimationFrame( animate );
+
     camera.lookAt(poolObject.position);
-    renderer.setSize( window.innerWidth, window.innerHeight ); // CONSTANTLY SET RENDERER SIZE INCASE OF NEW RESOLUTION
+
+
 	renderer.render( scene, camera );
+
+    //stats.end();
 }
 
 moveLoop();
