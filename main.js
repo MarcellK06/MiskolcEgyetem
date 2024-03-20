@@ -14,10 +14,17 @@ class gyongyData {
     }
 }
 
+// READ AND SEPERATE LINES FOR FILE
 const gyongyfile = await fs.readFile('./gyongyok.txt');
 const gyongyfilelines = gyongyfile.split('\n');
+
+// LIST TO STORE GYONGY DATA INTO
 var allGyongyData = [];
+
+// VECTOR3 VARIABLE TO DETERMINE FUTURE MAX SIZE OF POOL
 var maxPositions = new THREE.Vector3(0, 0, 0);
+
+// LOOP THROUGH LINES
 for(var k = 1; k < gyongyfilelines.length; k++) {
     gyongyfilelines[k] = gyongyfilelines[k].substring(0, gyongyfilelines[k].lastIndexOf(';'));
     var parts = gyongyfilelines[k].split(';');
@@ -26,13 +33,12 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
         z = parseInt(parts[2]),
         e = parseInt(parts[3]);
 
-    if (x > maxPositions.x)
-        maxPositions.x = x;
-    if (y > maxPositions.y)
-        maxPositions.y = y;
-    if (z > maxPositions.z)
-        maxPositions.z = z;
+    // CHECK IF BIGGER SIZE IF NEEDED
+    if (x > maxPositions.x)    maxPositions.x = x;
+    if (y > maxPositions.y)    maxPositions.y = y;
+    if (z > maxPositions.z)    maxPositions.z = z;
 
+    // ADD GYONGY TO THE LIST
     allGyongyData.push(new gyongyData(new THREE.Vector3(x, y, z), e))
 }
 
