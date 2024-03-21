@@ -52,7 +52,7 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
 }
 
 // SORT BY ÉRTÉK; EASIER PATH PLANNING
-allGyongyData.sort((a, b) =>  b.e - a.e || a.v3.x - b.v3.x);
+allGyongyData.sort((a, b) =>  b.e - a.e || a.v3.x - b.v3.x); // BEST: a.v3.x - b.v3.y | ISSUE: FIGURE OUT LOGIC
 
 // SET UP SCENE, CAMERA AND RENDERER
 const scene = new THREE.Scene();
@@ -203,21 +203,13 @@ function runScript() {
     var normalizedTowards0nth = new THREE.Vector3();
     if ((t+0.1 <= tO && movedAway != false) || goHome) {
         goHome = true;
-        normalizedTowards0nth.x = originObject.position.x - robotObject.position.x;
-        normalizedTowards0nth.y = originObject.position.y - robotObject.position.y - 1;
-        normalizedTowards0nth.z = originObject.position.z - robotObject.position.z - 1;
+        normalizedTowards0nth.set(originObject.position.x - robotObject.position.x, originObject.position.y - robotObject.position.y, originObject.position.z - robotObject.position.z);
         normalizedTowards0nth.normalize();
-        if (Math.floor(robotObject.position.x) != originObject.position.x - 1)
-            robotObject.translateOnAxis(new THREE.Vector3(normalizedTowards0nth.x, 0, 0), v/16.66);
-        if (Math.floor(robotObject.position.y) != originObject.position.y - 1)
-            robotObject.translateOnAxis(new THREE.Vector3(0, normalizedTowards0nth.y, 0), v/16.66);   
-        if (Math.floor(robotObject.position.z) != originObject.position.z - 1)
-            robotObject.translateOnAxis(new THREE.Vector3(0, 0, normalizedTowards0nth.z), v/16.66);   
+        if (robotObject.position != originObject.position)
+            robotObject.translateOnAxis(normalizedTowards0nth, v/16.66);
     }
     else {
-    normalizedTowards0nth.x = poolObject.children[1].position.x - robotObject.position.x;
-    normalizedTowards0nth.y = poolObject.children[1].position.y - robotObject.position.y;
-    normalizedTowards0nth.z = poolObject.children[1].position.z - robotObject.position.z;
+        normalizedTowards0nth.set(poolObject.children[1].position.x - robotObject.position.x, poolObject.children[1].position.y - robotObject.position.y, poolObject.children[1].position.z - robotObject.position.z);
     normalizedTowards0nth.normalize();
     if (Math.floor(robotObject.position.x) != poolObject.children[1].position.x)
         robotObject.translateOnAxis(new THREE.Vector3(normalizedTowards0nth.x, 0, 0), v/16.66);
@@ -232,11 +224,12 @@ function runScript() {
         poolObject.children.splice(1, 1);
 
         totalE += Math.floor(parseFloat(poolObject.children[1].geometry.boundingSphere.radius) * 10);
+        document.getElementById('points').innerHTML = totalE;
+
         movedAway = true;
     }
 
     t -= 16.66/1000;
-    document.getElementById('points').innerHTML = totalE;
     if (t > 0)
         setTimeout(runScript, 16.66);
         
