@@ -100,7 +100,7 @@ for(var k = 0; k < allGyongyData.length; k++) {
     gyongyObject.position.setY(poolBoundingBoxData[0].y + allGyongyData[k].v3.y);
     gyongyObject.position.setZ(poolBoundingBoxData[0].z + allGyongyData[k].v3.z);
 }
-
+allGyongyData = null;
 // ADD ORIGIN
 
 const origin = poolBoundingBoxData[0];
@@ -184,7 +184,6 @@ function reset() {
     window.location = "";
 }
 
-var timeElapsed = 0;
 var movedAway = false;
 var goHome = false;
 function runScript() {
@@ -235,18 +234,15 @@ function runScript() {
         totalE += Math.floor(parseFloat(poolObject.children[1].geometry.boundingSphere.radius) * 10);
         movedAway = true;
     }
-        //allGyongyData.splice(0, 1);
-        //robotObject.translateOnAxis(new THREE.Vector3(), -1);
 
     t -= 16.66/1000;
-    timeElapsed += 16.66;
     document.getElementById('points').innerHTML = totalE;
     if (t > 0)
         setTimeout(runScript, 16.66);
         
 }
 
-// EXPOSE startRobot() AS THIS JS FILE IS ORIGINALLY IMPORTED AS A MODULE
+// EXPOSE startRobot() and reset() AS THIS JS FILE IS ORIGINALLY IMPORTED AS A MODULE
 window.startRobot = startRobot;
 window.reset = reset;
 
