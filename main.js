@@ -52,7 +52,8 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
 }
 
 // SORT BY ÉRTÉK; EASIER PATH PLANNING
-allGyongyData.sort((a, b) => b.e - a.e);
+allGyongyData.sort((a, b) =>  b.e - a.e || a.v3.x - b.v3.x);
+console.log(allGyongyData);
 
 // SET UP SCENE, CAMERA AND RENDERER
 const scene = new THREE.Scene();
@@ -62,17 +63,23 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 // POOL SETTINGS
-const poolRotation = new THREE.Vector3(1.57, 0, 0);
+const poolRotation = new THREE.Vector3(180 * (180/Math.PI), 0, 0);
 const poolPosition = new THREE.Vector3(0, 0, 0);
 
+// ROBOT OBJECT
+const robotRadius = 1;
+const robotGeometry = new THREE.SphereGeometry(robotRadius);
+const robotMaterial = new THREE.MeshBasicMaterial({color: 0xff00ff});
+const robotObject = new THREE.Mesh(robotGeometry, robotMaterial);
 // POOL OBJECT
 const poolGeometry = new THREE.BoxGeometry(maxPositions.x, maxPositions.y, maxPositions.z);
 const poolMaterial = new THREE.MeshBasicMaterial({color: 0xfffffff, side:THREE.DoubleSide , transparent:true, opacity: 0.1});
+const poolObject = new THREE.Mesh(poolGeometry, poolMaterial);
+scene.add(poolObject);
+poolObject.add(robotObject);
 
 // POOL OUTLINE/BORDER
-const poolObject = new THREE.Mesh(poolGeometry, poolMaterial);
 const poolOutline = new THREE.LineSegments(new THREE.EdgesGeometry(poolGeometry), new THREE.LineBasicMaterial({color: 0xffffff}));
-scene.add(poolObject);
 scene.add(poolOutline);
 
 // POOL DATA
@@ -99,7 +106,7 @@ for(var k = 0; k < allGyongyData.length; k++) {
 
 const origin = poolBoundingBoxData[0];
 const originGeometry = new THREE.SphereGeometry(2);
-const originMaterial = new THREE.MeshBasicMaterial({color: 0xe4080a});
+const originMaterial = new THREE.MeshBasicMaterial({color: 0xe4080a, side:THREE.DoubleSide , transparent:true, opacity: 0.4});
 const originObject = new THREE.Mesh(originGeometry, originMaterial);
 originObject.position.x = origin.x;
 originObject.position.y = origin.y;
@@ -108,6 +115,10 @@ poolObject.add(originObject);
 
 // APPLY SETTINGS
 
+robotObject.position.set(originObject.position.x, originObject.position.y, originObject.position.z);
+robotObject.rotation.x = 0;
+robotObject.rotation.y = 0;
+robotObject.rotation.z = 0;
 /* DEBUG - POOL HALFER
 poolBordersLine.position.y = poolPosition.y;
 poolBordersLine.rotation.setFromVector3(poolRotation);
@@ -168,11 +179,79 @@ function storeValues() {
 
 function startRobot() {
     storeValues();
-    console.log(`${t} | ${v}`);
+    runScript();
+}
+function reset() {
+    window.location = "";
+}
+
+var timeElapsed = 0;
+var movedAway = false;
+var goHome = false;
+function runScript() {
+    const s = robotObject.position.distanceTo(poolObject.children[1].position)
+    const sO = robotObject.position.distanceTo(originObject.position)
+    const Tn = s / v;
+    var tO = sO / v;
+    if(!movedAway) {
+    const distFromFirstToOrigin = poolObject.children[1].position.distanceTo(originObject.position) / v;
+    const canStart = t >= Tn + distFromFirstToOrigin;
+    console.log(Tn + distFromFirstToOrigin);
+        if (!canStart){ 
+            alert("Not enough time to get to the first point and back.");    
+            return;
+        }
+    }
+
+    var normalizedTowards0nth = new THREE.Vector3();
+    if ((t+0.1 <= tO && movedAway != false) || goHome) {
+        goHome = true;
+        normalizedTowards0nth.x = originObject.position.x - robotObject.position.x;
+        normalizedTowards0nth.y = originObject.position.y - robotObject.position.y - 1;
+        normalizedTowards0nth.z = originObject.position.z - robotObject.position.z - 1;
+        normalizedTowards0nth.normalize();
+        if (Math.floor(robotObject.position.x) != originObject.position.x - 1)
+            robotObject.translateOnAxis(new THREE.Vector3(normalizedTowards0nth.x, 0, 0), v/16.66);
+        if (Math.floor(robotObject.position.y) != originObject.position.y - 1)
+            robotObject.translateOnAxis(new THREE.Vector3(0, normalizedTowards0nth.y, 0), v/16.66);   
+        if (Math.floor(robotObject.position.z) != originObject.position.z - 1)
+            robotObject.translateOnAxis(new THREE.Vector3(0, 0, normalizedTowards0nth.z), v/16.66);   
+    }
+    else {
+    normalizedTowards0nth.x = poolObject.children[1].position.x - robotObject.position.x;
+    normalizedTowards0nth.y = poolObject.children[1].position.y - robotObject.position.y;
+    normalizedTowards0nth.z = poolObject.children[1].position.z - robotObject.position.z;
+    normalizedTowards0nth.normalize();
+    if (Math.floor(robotObject.position.x) != poolObject.children[1].position.x)
+        robotObject.translateOnAxis(new THREE.Vector3(normalizedTowards0nth.x, 0, 0), v/16.66);
+    if (Math.floor(robotObject.position.y) != poolObject.children[1].position.y)
+        robotObject.translateOnAxis(new THREE.Vector3(0, normalizedTowards0nth.y, 0), v/16.66);   
+    if (Math.floor(robotObject.position.z) != poolObject.children[1].position.z)
+        robotObject.translateOnAxis(new THREE.Vector3(0, 0, normalizedTowards0nth.z), v/16.66);   
+    }
+
+    if (Math.floor(robotObject.position.x) == Math.floor(poolObject.children[1].position.x) && Math.floor(robotObject.position.y) == Math.floor(poolObject.children[1].position.y) && Math.floor(robotObject.position.z) == Math.floor(poolObject.children[1].position.z))
+    {
+        poolObject.children.splice(1, 1);
+
+        totalE += Math.floor(parseFloat(poolObject.children[1].geometry.boundingSphere.radius) * 10);
+        console.log(totalE);
+        movedAway = true;
+    }
+        //allGyongyData.splice(0, 1);
+        //robotObject.translateOnAxis(new THREE.Vector3(), -1);
+
+    t -= 16.66/1000;
+    timeElapsed += 16.66;
+    document.getElementById('points').innerHTML = totalE;
+    if (t > 0)
+        setTimeout(runScript, 16.66);
+        
 }
 
 // EXPOSE startRobot() AS THIS JS FILE IS ORIGINALLY IMPORTED AS A MODULE
 window.startRobot = startRobot;
+window.reset = reset;
 
 // STATS FOR PERFORMANCE
 //stats.showPanel(0) 
