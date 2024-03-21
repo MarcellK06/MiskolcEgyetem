@@ -53,7 +53,6 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
 
 // SORT BY ÉRTÉK; EASIER PATH PLANNING
 allGyongyData.sort((a, b) =>  b.e - a.e || a.v3.x - b.v3.x);
-console.log(allGyongyData);
 
 // SET UP SCENE, CAMERA AND RENDERER
 const scene = new THREE.Scene();
@@ -196,7 +195,6 @@ function runScript() {
     if(!movedAway) {
     const distFromFirstToOrigin = poolObject.children[1].position.distanceTo(originObject.position) / v;
     const canStart = t >= Tn + distFromFirstToOrigin;
-    console.log(Tn + distFromFirstToOrigin);
         if (!canStart){ 
             alert("Not enough time to get to the first point and back.");    
             return;
@@ -235,7 +233,6 @@ function runScript() {
         poolObject.children.splice(1, 1);
 
         totalE += Math.floor(parseFloat(poolObject.children[1].geometry.boundingSphere.radius) * 10);
-        console.log(totalE);
         movedAway = true;
     }
         //allGyongyData.splice(0, 1);
