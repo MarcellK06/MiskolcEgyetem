@@ -107,17 +107,13 @@ const origin = poolBoundingBoxData[0];
 const originGeometry = new THREE.SphereGeometry(2);
 const originMaterial = new THREE.MeshBasicMaterial({color: 0xe4080a, side:THREE.DoubleSide , transparent:true, opacity: 0.4});
 const originObject = new THREE.Mesh(originGeometry, originMaterial);
-originObject.position.x = origin.x;
-originObject.position.y = origin.y;
-originObject.position.z = origin.z;
+originObject.position.set(origin.x, origin.y, origin.z);
 poolObject.add(originObject);
 
 // APPLY SETTINGS
 
 robotObject.position.set(originObject.position.x, originObject.position.y, originObject.position.z);
-robotObject.rotation.x = 0;
-robotObject.rotation.y = 0;
-robotObject.rotation.z = 0;
+robotObject.rotation.set(0, 0, 0,);
 /* DEBUG - POOL HALFER
 poolBordersLine.position.y = poolPosition.y;
 poolBordersLine.rotation.setFromVector3(poolRotation);
@@ -211,6 +207,7 @@ function runScript() {
     else {
         normalizedTowards0nth.set(poolObject.children[1].position.x - robotObject.position.x, poolObject.children[1].position.y - robotObject.position.y, poolObject.children[1].position.z - robotObject.position.z);
     normalizedTowards0nth.normalize();
+
     if (Math.floor(robotObject.position.x) != poolObject.children[1].position.x)
         robotObject.translateOnAxis(new THREE.Vector3(normalizedTowards0nth.x, 0, 0), v/16.66);
     if (Math.floor(robotObject.position.y) != poolObject.children[1].position.y)
@@ -218,7 +215,6 @@ function runScript() {
     if (Math.floor(robotObject.position.z) != poolObject.children[1].position.z)
         robotObject.translateOnAxis(new THREE.Vector3(0, 0, normalizedTowards0nth.z), v/16.66);   
     }
-
     if (Math.floor(robotObject.position.x) == Math.floor(poolObject.children[1].position.x) && Math.floor(robotObject.position.y) == Math.floor(poolObject.children[1].position.y) && Math.floor(robotObject.position.z) == Math.floor(poolObject.children[1].position.z))
     {
         poolObject.children.splice(1, 1);
