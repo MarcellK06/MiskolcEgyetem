@@ -12,9 +12,12 @@ class gyongyData {
         this.e = e;
     }
 }
-
 // READ AND SEPERATE LINES FOR FILE
-const gyongyfile = await fs.readFile('./gyongyok.txt');
+const gyongyfile = await fetch("./gyongyok.txt").then(async (data) => {
+    const text = await data.text();
+    
+    return text;
+});
 const gyongyfilelines = gyongyfile.split('\n');
 
 // STATS FOR PERFORMANCE
@@ -48,11 +51,14 @@ for(var k = 1; k < gyongyfilelines.length; k++) {
     if (z > maxPositions.z) maxPositions.z = z;
 
     // ADD GYONGY TO THE LIST
-    allGyongyData.push(new gyongyData(new THREE.Vector3(x, y, z), e))
+    var newGyongy = new gyongyData(new THREE.Vector3(x, y, z), e);
+  
+    allGyongyData.push(newGyongy)
+
 }
 
 // SORT BY ÉRTÉK; EASIER PATH PLANNING
-allGyongyData.sort((a, b) =>  b.e - a.e || a.v3.x - b.v3.x); // BEST: a.v3.x - b.v3.y | ISSUE: FIGURE OUT LOGIC
+allGyongyData.sort((a, b) =>  b.e - a.e ||  a.v3.x - b.v3.x);
 
 // SET UP SCENE, CAMERA AND RENDERER
 const scene = new THREE.Scene();
@@ -197,7 +203,7 @@ function runScript() {
     }
 
     var normalizedTowards0nth = new THREE.Vector3();
-    if ((t+0.1 <= tO && movedAway != false) || goHome) {
+    if ((t <= tO && movedAway != false) || goHome) {
         goHome = true;
         normalizedTowards0nth.set(originObject.position.x - robotObject.position.x, originObject.position.y - robotObject.position.y, originObject.position.z - robotObject.position.z);
         normalizedTowards0nth.normalize();
@@ -226,8 +232,19 @@ function runScript() {
     }
 
     t -= 16.66/1000;
-    if (t > 0)
+    if (t > 0) {
         setTimeout(runScript, 16.66);
+    }
+    else {
+        if (originObject.position.x - robotObject.position.x < 0.5 && originObject.position.x - robotObject.position.x > -0.5)
+            robotObject.position.x = originObject.position.x;
+        if (originObject.position.y - robotObject.position.y < 0.5 && originObject.position.y - robotObject.position.y > -0.5)
+            robotObject.position.y = originObject.position.y;
+        if (originObject.position.z - robotObject.position.z < 0.5 && originObject.position.z - robotObject.position.z > -0.5)
+            robotObject.position.z = originObject.position.z;
+        console.log(originObject.position.x - robotObject.position.x);
+        console.log(originObject.position);
+    }
         
 }
 
