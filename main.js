@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-//import Stats from 'stats.js'
-import fs from 'vite-plugin-fs/browser'
 
 /**
  * @param {THREE.Vector3Like} v3 A gyöngy Vector3 adata
@@ -20,8 +18,6 @@ const gyongyfile = await fetch("./gyongyok.txt").then(async (data) => {
 });
 const gyongyfilelines = gyongyfile.split('\n');
 
-// STATS FOR PERFORMANCE
-//const stats = new Stats()
 
 // LIST TO STORE GYONGY DATA INTO
 var allGyongyData = [];
@@ -90,10 +86,6 @@ scene.add(poolOutline);
 // POOL DATA
 var poolBoundingBoxData = [poolGeometry.center().boundingBox.min, poolGeometry.center().boundingBox.max];
 
-/* DEBUG - POOL HALFER
-const poolBordersLineGeometry = new THREE.BufferGeometry().setFromPoints(poolBoundingBoxData);
-const poolBordersLine = new THREE.Line(poolBordersLineGeometry, THREE.poolMaterial);
-*/
 
 // GYONGY SETUP
 const gyongyMaterial = new THREE.MeshBasicMaterial({color: 0xffde59});
@@ -120,10 +112,6 @@ poolObject.add(originObject);
 
 robotObject.position.set(originObject.position.x, originObject.position.y, originObject.position.z);
 robotObject.rotation.set(0, 0, 0,);
-/* DEBUG - POOL HALFER
-poolBordersLine.position.y = poolPosition.y;
-poolBordersLine.rotation.setFromVector3(poolRotation);
-*/
 
 // CAMERA SETTINGS
 
@@ -252,22 +240,14 @@ function runScript() {
 window.startRobot = startRobot;
 window.reset = reset;
 
-// STATS FOR PERFORMANCE
-//stats.showPanel(0) 
-
-//document.body.appendChild(stats.dom)
 
 function animate() {
-    //stats.begin();
-
 	requestAnimationFrame( animate );
 
     camera.lookAt(poolObject.position);
 
 
 	renderer.render( scene, camera );
-
-    //stats.end();
 }
 
 moveLoop();
