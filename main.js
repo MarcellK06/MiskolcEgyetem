@@ -28,6 +28,7 @@ var maxPositions = new THREE.Vector3(0, 0, 0);
 var t = 0;
 var v = 0;
 var totalE = 0;
+var totalCount = 0;
 
 // LOOP THROUGH LINES
 for(var k = 1; k < gyongyfilelines.length; k++) {
@@ -214,6 +215,7 @@ function runScript() {
         poolObject.children.splice(1, 1);
 
         totalE += Math.floor(parseFloat(poolObject.children[1].geometry.boundingSphere.radius) * 10);
+        totalCount++;
         document.getElementById('points').innerHTML = totalE;
 
         movedAway = true;
@@ -230,8 +232,8 @@ function runScript() {
             robotObject.position.y = originObject.position.y;
         if (originObject.position.z - robotObject.position.z < 0.5 && originObject.position.z - robotObject.position.z > -0.5)
             robotObject.position.z = originObject.position.z;
-        console.log(originObject.position.x - robotObject.position.x);
-        console.log(originObject.position);
+        document.getElementById('total').innerHTML = totalCount;
+        alert(`Össze szedett pontok száma: ${totalE}\nÖsszeszedett gyöngyök száma: ${totalCount}`); 
     }
         
 }
